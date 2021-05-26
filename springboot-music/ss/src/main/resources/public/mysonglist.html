@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>歌单</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/songlist.css">
+    <link rel="shortcut icon" type="image/x-icon" href="images/logo1.png">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/index.css">
+
+</head>
+<body>
+<div id="songList">
+    <span class="content_left_fenlei"><a href="#allRadio" onclick="addSongList()" data-toggle="tab">新增歌单</a></span>
+    <span class="content_left_fenlei"><a href="#absoluteMusicRadio" onclick="changeTitle('纯音电台')"
+                                         data-toggle="tab">纯音电台</a></span>
+</div>
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap-paginator.min.js"></script>
+<script src="js/jquery.validate.min.js"></script>
+<script src="js/tools.js"></script>
+<script src="js/jquery.cookie.js"></script>
+<script type="text/javascript">
+
+
+    if ($.cookie("user_name") != undefined && $.cookie("user_name") != "1") {
+        $("#userName").text("账号：" + $.cookie("user_name"));
+        $("#zhuXiao").text("注销");
+
+
+        document.getElementById("touxiang").src = "images/touxiang2.jpg";
+        $("#display1").attr("style", "display:none;");
+    }
+
+    $('#test').validate({
+        errorPlacement: function (error, element) {
+            error.appendTo(element.parent());
+        },
+        onfocusout: function (element) {
+            $(element).valid();
+        },
+        submitHandler: function (form) {
+            denglu($('#test').attr("action"), $('#test').serialize());
+
+
+        }
+    });
+
+
+</script>
+</body>
+</html>

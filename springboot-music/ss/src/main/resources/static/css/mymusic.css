@@ -242,6 +242,55 @@ a {
 	height: 500px;
 	margin: 0 auto;
 }
+.contentN {
+	width: 1200px;
+	margin: 0 auto;
+}
+.fenleititle {
+	width: 1000px;
+	height: 30px;
+	text-align: center;
+}
+
+.fenlei_left {
+	display: block;
+	width: 210px;
+	height: 30px;
+	background-color: #cfcfcf;
+	color: white;
+	font-size: 15px;
+	float: left;
+	padding-top: 5px;
+}
+
+.fenlei_right {
+	display: block;
+	width: 780px;
+	height: 30px;
+	margin-left: 10px;
+	background-color: #cfcfcf;
+	color: white;
+	font-size: 15px;
+	float: right;
+	padding-top: 5px;
+}
+
+.content_left {
+	display: block;
+	width: 210px;
+	height: 154px;
+	float: left;
+	text-align: center;
+	margin-top: 20px;
+}
+
+.content_left_fenlei {
+	display: block;
+	width: 210px;
+	height: 36px;
+	font-size: 15px;
+	line-height: 36px;
+}
 
 .geRenZiLiao {
 	width: 1200px;

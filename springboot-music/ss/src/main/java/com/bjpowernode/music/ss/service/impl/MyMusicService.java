@@ -43,9 +43,10 @@ public class MyMusicService extends AbstractService<MyMusic, MyMusic> implements
 		return myMusicMapper.getUserById(user_name, user_password);
 	}
 
+
 	@Override
-	public List<MyMusic> getMyMusicList(int userId) {
-		return myMusicMapper.getMyMusicList(userId);
+	public List<MyMusic> getMySongListNames(int userId) {
+		return myMusicMapper.getMySongListNames(userId);
 	}
 
 	// 删除音乐
@@ -54,4 +55,16 @@ public class MyMusicService extends AbstractService<MyMusic, MyMusic> implements
 		return myMusicMapper.deleteMyMusic(song_id, user_id);
 	}
 
+
+
+	// 删除音乐
+	@Override
+	public int addSongList(String songListName,int userId) {
+		return myMusicMapper.addSongList(songListName,userId);
+	}
+
+	@Override
+	public int addSongToSongList(int song_id, int song_list_id) {
+		return myMusicMapper.addSongToSongList(song_id,song_list_id);
+	}
 }

@@ -12,6 +12,7 @@ import javax.annotation.Resource;
 
 import com.bjpowernode.music.common.AbstractService;
 import com.bjpowernode.music.ss.domain.MusicLink;
+import com.bjpowernode.music.ss.domain.MyMusic;
 import com.bjpowernode.music.ss.mapper.IMusicLinkMapper;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +44,11 @@ public class MusicLinkService extends AbstractService<MusicLink, MusicLink> impl
 
 	}
 
+	public List<MusicLink> songRearchSinger(String singerName) {
+		return musicLinkMapper.songRearchBySinger(singerName);
+
+	}
+
 	public String getUserId(String user_name, String user_password) {
 		return musicLinkMapper.getUserId(user_name, user_password);
 	}
@@ -56,5 +62,17 @@ public class MusicLinkService extends AbstractService<MusicLink, MusicLink> impl
 	public String judgeSong(String songName, int userId) {
 		return musicLinkMapper.judgeSong(songName, userId);
 	}
+
+
+	@Override
+	public List<MusicLink> getMyMusicList(int userId) {
+		return musicLinkMapper.getMyMusicList(userId);
+	}
+
+	@Override
+	public int deleteMyMusic(Integer song_list_id, Integer ml_id) {
+		return musicLinkMapper.deleteMyMusic(song_list_id,ml_id);
+	}
+
 
 }

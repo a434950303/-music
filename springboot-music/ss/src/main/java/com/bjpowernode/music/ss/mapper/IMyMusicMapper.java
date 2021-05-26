@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.bjpowernode.music.ss.domain.MyMusic;
 import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -19,13 +20,17 @@ public interface IMyMusicMapper extends IOperations<MyMusic, MyMusic> {
 	@Select("select user_id from user where user_name=#{user_name} and user_password=#{user_password}")
 	public String getUserById(@Param("user_name") String user_name, @Param("user_password") String user_password);
 
-	// #是将传入的值当做字符串的形式,$是将传入的数据直接显示生成sql语句
-	// 从数据库中搜索歌曲在我的音乐列表中显示
-	@Select("select * from mymusic where user_id=${user_id}")
-	public List<MyMusic> getMyMusicList(@Param("user_id") int user_id);
+
+	@Select("select song_list_id,song_list_name from song_list_user where user_id=${user_id}")
+	public List<MyMusic> getMySongListNames(@Param("user_id") int user_id);
 
 	// 删除音乐
 	@Delete("delete from mymusic where my_id=${song_id} and user_id=${user_id}")
 	public int deleteMyMusic(@Param("song_id") int song_id, @Param("user_id") int user_id);
 
+	@Insert("insert into song_list_user(song_list_name,user_id) values(#{songListName},#{userId})")
+	int addSongList( @Param("songListName")  String songListName,@Param("userId") int userId);
+
+	@Insert("insert into song_list_song(song_list_id,song_id) values(#{song_list_id},#{song_id})")
+	int addSongToSongList(int song_id, int song_list_id);
 }

@@ -40,7 +40,6 @@ public class MusicLinkController {
 
 	@Resource
 	protected IMusicLinkService musicLinkService;
-
 	@Resource
 	protected MusicLinkService musicLinkService2;
 	
@@ -206,6 +205,54 @@ public class MusicLinkController {
 		return webResponse.getWebResponse(statusCode, statusMsg, data);
 	}
 
+	// 歌曲搜索功能
+	@RequestMapping(value = "/getSongRearchBySinger", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public WebResponse getSongRearchBySinger(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+									 @RequestParam(required = false) String singerName) {
+
+		Object data = null;
+		String statusMsg = "";
+		int statusCode = 200;
+
+		// 调用Mapper层的songRearch方法，进行数据库的操作
+		List<MusicLink> list = this.musicLinkService2.songRearchSinger(singerName);
+
+		int count = list.size();
+		System.out.println();
+		System.out.println("搜索到的歌曲数：" + count);
+		System.out.println("结束");
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		map.put("total", count);
+		int size = list.size();
+		if (size > 0) {
+			List<MusicLink> listFont = new ArrayList<MusicLink>();
+			MusicLink vo;
+			MusicLink voFont = new MusicLink();
+			for (int i = 0; i < size; i++) {
+				vo = list.get(i);
+				BeanUtils.copyProperties(vo, voFont);
+				listFont.add(voFont);
+				voFont = new MusicLink();
+			}
+			map.put("list", listFont);
+			data = map;
+//				for (int i = 0; i < map.size(); i++) {
+//					System.out.println(map.get(listFont).toString());
+//				}
+//
+			statusMsg = "根据条件获取分页数据成功！！！";
+		} else {
+			map.put("list", list);
+			data = map;
+			statusCode = 202;
+			statusMsg = "no record!!!";
+			return webResponse.getWebResponse(statusCode, statusMsg, data);
+		}
+
+		return webResponse.getWebResponse(statusCode, statusMsg, data);
+	}
+
 	// 歌曲收藏
 	@RequestMapping(value = "/addMusicCollect", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
@@ -268,6 +315,55 @@ public class MusicLinkController {
 
 		return webResponse.getWebResponse(statusCode, statusMsg, data);
 
+	}
+
+
+	// 歌曲搜索功能
+	@RequestMapping(value = "/getSongList", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public WebResponse getSongList(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+									 @RequestParam(required = false) String songName) {
+
+		Object data = null;
+		String statusMsg = "";
+		int statusCode = 200;
+
+		// 调用Mapper层的songRearch方法，进行数据库的操作
+		List<MusicLink> list = this.musicLinkService2.songRearch(songName);
+
+		int count = list.size();
+		System.out.println();
+		System.out.println("搜索到的歌曲数：" + count);
+		System.out.println("结束");
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		map.put("total", count);
+		int size = list.size();
+		if (size > 0) {
+			List<MusicLink> listFont = new ArrayList<MusicLink>();
+			MusicLink vo;
+			MusicLink voFont = new MusicLink();
+			for (int i = 0; i < size; i++) {
+				vo = list.get(i);
+				BeanUtils.copyProperties(vo, voFont);
+				listFont.add(voFont);
+				voFont = new MusicLink();
+			}
+			map.put("list", listFont);
+			data = map;
+//				for (int i = 0; i < map.size(); i++) {
+//					System.out.println(map.get(listFont).toString());
+//				}
+//
+			statusMsg = "根据条件获取分页数据成功！！！";
+		} else {
+			map.put("list", list);
+			data = map;
+			statusCode = 202;
+			statusMsg = "no record!!!";
+			return webResponse.getWebResponse(statusCode, statusMsg, data);
+		}
+
+		return webResponse.getWebResponse(statusCode, statusMsg, data);
 	}
 
 }

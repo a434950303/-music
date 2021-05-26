@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -12,7 +13,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.bjpowernode.music.common.WebResponse;
+import com.bjpowernode.music.ss.domain.MusicLink;
 import com.bjpowernode.music.ss.domain.MyMusic;
+import com.bjpowernode.music.ss.service.IMusicLinkService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,8 +27,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.bjpowernode.music.ss.service.IMyMusicService;
 
 /**
- * 
- *
  * @date 2018年12月23日 00:03:48
  */
 
@@ -33,163 +34,155 @@ import com.bjpowernode.music.ss.service.IMyMusicService;
 @RequestMapping("/myMusic")
 public class MyMusicController {
 
-	@Autowired
-	protected WebResponse webResponse;
+    @Autowired
+    protected WebResponse webResponse;
 
-	@Resource
-	protected IMyMusicService myMusicService;
+    @Resource
+    protected IMyMusicService myMusicService;
 
+    @Resource
+    protected IMusicLinkService musicLinkService;
 //	@Autowired
 //	MyMusicService myMusicService2;
 
-	// 歌曲收藏
-	@RequestMapping(value = "/addMusicCollect", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public WebResponse addMusicCollect(HttpServletRequest request, HttpServletResponse response, HttpSession session,
-			@RequestParam(required = false) String user_name) {
-		WebResponse webResponse = new WebResponse();
-		MyMusic myMusic = new MyMusic();
-		System.out.println("接收到的用户名:" + user_name);
+    // 歌曲收藏
+    @RequestMapping(value = "/addMusicCollect", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public WebResponse addMusicCollect(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+                                       @RequestParam(required = false) String user_name) {
+        WebResponse webResponse = new WebResponse();
+        MyMusic myMusic = new MyMusic();
+        System.out.println("接收到的用户名:" + user_name);
 
-		Integer statusCode = 200;
+        Integer statusCode = 200;
 
-		// 数据库插入语句，对应xml文件的insert
-		this.myMusicService.insert(myMusic);
+        // 数据库插入语句，对应xml文件的insert
+        this.myMusicService.insert(myMusic);
 
-		webResponse.setStatusCode(statusCode);
-		return webResponse;
+        webResponse.setStatusCode(statusCode);
+        return webResponse;
 
-	}
+    }
 
-	// 从数据库中获取歌曲数据，在我的音乐中显示
-	@RequestMapping(value = "/getMyMusicList", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public WebResponse getMyMusicList(HttpServletRequest request, HttpServletResponse response, HttpSession session,
-			@RequestParam(defaultValue = "1", required = false) Integer pageNo,
-			@RequestParam(defaultValue = "10", required = false) Integer pageSize,
-			@RequestParam(defaultValue = "正常", required = false) String tbStatus,
-			@RequestParam(required = false) String keyword,
-			@RequestParam(defaultValue = "ml_id", required = false) String order,
-			@RequestParam(defaultValue = "desc", required = false) String desc,
-			@RequestParam(required = false) String user_name, @RequestParam(required = false) String user_password
-			) {
+    // 从数据库中获取歌曲数据，在我的音乐中显示
+    @RequestMapping(value = "/getMyMusicList", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public WebResponse getMyMusicList(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+                                      @RequestParam(required = false) int user_id
+    ) {
 
-//		System.out.println("我的音乐显示列表前收藏的歌曲id:" + song_id);
-		String user_Id = null;
-		try {
-			user_Id = myMusicService.getUserById(user_name, user_password);
-		} catch (Exception e) {
+        Object data = null;
+        String statusMsg = "";
+        int statusCode = 200;
 
-		}
-		int userId = 0;
-		try {
-			// 判断字符串是否是数字，并且抛出异常
-			boolean NotisNum = (user_Id.equals("null"));
-			// System.out.println(NotisNum);
-			if (!NotisNum) {
-				userId = Integer.parseInt(user_Id);
-			}
-		} catch (Exception e) {
+        try {
+            List<MusicLink> list = musicLinkService.getMyMusicList(user_id);
 
-		}
-		System.out.println("我的音乐显示列表前用户id:" + userId);
+            Map<Object, Object> map = new HashMap<Object, Object>();
+            // map.put("total", count);
+            int size = list.size();
+            if (size > 0) {
+                List<MusicLink> listFont = new ArrayList<MusicLink>();
+                MusicLink vo;
+                MusicLink voFont = new MusicLink();
+                for (int i = 0; i < size; i++) {
+                    vo = list.get(i);
+                    // 通过java反射将类中当前属性字段对应的内容复制到另外一个类中
+                    BeanUtils.copyProperties(vo, voFont);
+                    listFont.add(voFont);
+                    voFont = new MusicLink();
+                }
+                map.put("list", listFont);
+                data = map;
+                statusMsg = "根据条件获取分页数据成功！！！";
+            } else {
+                map.put("list", list);
+                data = map;
+                statusCode = 202;
+                statusMsg = "no record!!!";
+                return webResponse.getWebResponse(statusCode, statusMsg, data);
+            }
 
-		Object data = null;
-		String statusMsg = "";
-		int statusCode = 200;
-		LinkedHashMap<String, String> condition = new LinkedHashMap<String, String>();
-		/*
-		 * if (tbStatus != null && tbStatus.length() > 0) { condition.put("tb_status='"
-		 * + tbStatus + "'", "and"); }
-		 */
-		if (keyword != null && keyword.length() > 0) {
-			StringBuffer buf = new StringBuffer();
-			buf.append("(");
-			buf.append("test_name like '%").append(keyword).append("%'");
-			buf.append(" or ");
-			buf.append("info like '%").append(keyword).append("%'");
-			buf.append(" or ");
-			buf.append("other like '%").append(keyword).append("%'");
-			buf.append(")");
-			condition.put(buf.toString(), "and");
-		}
-		String field = null;
-		if (condition.size() > 0) {
-			condition.put(condition.entrySet().iterator().next().getKey(), "");
-		}
-		// int count = this.myMusicService.getCount(condition, field);
-		if (order != null && order.length() > 0 & "desc".equals(desc)) {
-			order = order + " desc";
-		}
+        } catch (Exception e) {
 
-		// List<MyMusic> list = this.myMusicService.getList(condition, pageNo, pageSize,
-		// order, field);
-
-		try {
-			List<MyMusic> list = this.myMusicService.getMyMusicList(userId);
-
-			Map<Object, Object> map = new HashMap<Object, Object>();
-			// map.put("total", count);
-			int size = list.size();
-			if (size > 0) {
-				List<MyMusic> listFont = new ArrayList<MyMusic>();
-				MyMusic vo;
-				MyMusic voFont = new MyMusic();
-				for (int i = 0; i < size; i++) {
-					vo = list.get(i);
-					// 通过java反射将类中当前属性字段对应的内容复制到另外一个类中
-					BeanUtils.copyProperties(vo, voFont);
-					listFont.add(voFont);
-					voFont = new MyMusic();
-				}
-				map.put("list", listFont);
-				data = map;
-				statusMsg = "根据条件获取分页数据成功！！！";
-			} else {
-				map.put("list", list);
-				data = map;
-				statusCode = 202;
-				statusMsg = "no record!!!";
-				return webResponse.getWebResponse(statusCode, statusMsg, data);
-			}
-
-		}catch (Exception e){
-
-		}
+        }
 
 
+        return webResponse.getWebResponse(statusCode, statusMsg, data);
+    }
+
+    // 删除音乐
+    @RequestMapping(value = "/deleteMyMusic", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public WebResponse deleteMyMusic(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+                                     @RequestParam(required = false) Integer song_list_id, @RequestParam(required = false) Integer ml_id) {
+        WebResponse webResponse = new WebResponse();
+
+        Object data = null;
+        String statusMsg = "";
+        int statusCode = 201;
+        int del = 0;
+        del = musicLinkService.deleteMyMusic(song_list_id, ml_id);
 
 
+        return webResponse.getWebResponse(statusCode, statusMsg, data);
+    }
 
 
-		return webResponse.getWebResponse(statusCode, statusMsg, data);
-	}
+    // 新增歌单
+    @RequestMapping(value = "/addSongList", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public WebResponse addSongList(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+                                   @RequestParam(required = false) String songListName, @RequestParam(required = false) int userId) {
+        WebResponse webResponse = new WebResponse();
+        MyMusic myMusic = new MyMusic();
 
-	// 删除音乐
-	@RequestMapping(value = "/deleteMyMusic", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public WebResponse deleteMyMusic(HttpServletRequest request, HttpServletResponse response, HttpSession session,
-			@RequestParam(required = false) Integer user_id, @RequestParam(required = false) Integer song_id) {
-		WebResponse webResponse = new WebResponse();
-		MyMusic myMusic = new MyMusic();
-		System.out.println("删除音乐前的用户名id:" + user_id);
+        Object data = null;
+        String statusMsg = "";
+        int statusCode = 200;
+        int del = 0;
 
-		Object data = null;
-		String statusMsg = "";
-		int statusCode = 201;
-		int del = 0;
+        del = this.myMusicService.addSongList(songListName, userId);
 
-		if (user_id == null){
-			 del = this.myMusicService.deleteMyMusic(song_id, 0);
-		}else {
-			del = this.myMusicService.deleteMyMusic(song_id, user_id);
-		}
+        return webResponse.getWebResponse(statusCode, statusMsg, data);
+    }
 
-		if (del > 0) {
-			statusCode = 200;
-		}
 
-		return webResponse.getWebResponse(statusCode, statusMsg, data);
-	}
+    // 从数据库中获取歌曲数据，在我的音乐中显示
+    @RequestMapping(value = "/getMySongListNames", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public WebResponse getMySongListNames(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+                                          @RequestParam(required = false) int user_id
+    ) {
+        String str = "";
+        Object data = null;
+        String statusMsg = "";
+        int statusCode = 200;
+
+        try {
+            List<MyMusic> list = this.myMusicService.getMySongListNames(user_id);
+            List<String> stringList = list.stream().map(e -> "\"" + e.getSong_list_id() + "\": \"" + e.getSong_list_name() + "\"").collect(Collectors.toList());
+            str = String.join(",", stringList);
+            str = "{" + str + "}";
+
+        } catch (Exception e) {
+
+        }
+
+
+        return webResponse.getWebResponse(statusCode, statusMsg, str);
+    }
+
+    // 增加收藏
+    @RequestMapping(value = "/addSongToSongList", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public WebResponse addSongToSongList(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+                                         @RequestParam(required = false) int song_id, @RequestParam(required = false) int song_list_id
+    ) {
+        String statusMsg = "";
+        int statusCode = 200;
+        int res = this.myMusicService.addSongToSongList(song_id, song_list_id);
+        return webResponse.getWebResponse(statusCode, statusMsg, "收藏成功！");
+    }
 
 }
